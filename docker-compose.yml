@@ -30,7 +30,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${DATABASE_PASSWORD}
       - MYSQL_DATABASE=${DATABASE_NAME}
-      - MYSQL_LOWER_CASE_TABLE_NAMES=2
+      - MYSQL_LOWER_CASE_TABLE_NAMES=0
     volumes:
       - ./data:/var/lib/mysql
     networks:
