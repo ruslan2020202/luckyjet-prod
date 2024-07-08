@@ -2,3 +2,4 @@
 __pycache__
 game.db-journal
 .DS_Store
+data/

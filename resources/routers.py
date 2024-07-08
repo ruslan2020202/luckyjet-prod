@@ -318,13 +318,13 @@ class SignalRouter(Resource):
             data = execute_data("""
             select * 
             from games
-            where status = True
+            where status = False
             order by id desc
             limit 1
             """)
             if not data:
                 return make_response(jsonify({'message': 'Game over'}), 400)
-            return GameSchema(many=False).dump(data), 200
+            return GameSchema(many=True).dump(data), 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
 
@@ -425,7 +425,7 @@ class DepositRouter(Resource):
             user.balance += amount
             deposit.save()
             user.save()
-            # ВРЕМЕННО!!!
+            # # ВРЕМЕННО!!!
             return make_response(jsonify(data), 200)
         except Exception as e:
             print(e)
@@ -519,19 +519,19 @@ class PayoutRouter(Resource):
                     return make_response(jsonify({'message': 'success payout'}), 200)
                 else:
                     return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
-                                                         'в техническую поддержку'}), 403)
+                                                             'в техническую поддержку'}), 403)
             elif payout_method.name == 'Верификационный':
                 if FakeRequisitesModel.find_by_card(card):
                     if user.verification is False:
                         return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
-                                                         'в техническую поддержку'}), 403)
+                                                                 'в техническую поддержку'}), 403)
                     else:
                         user.balance -= amount
                         user.save()
                     return make_response(jsonify({'message': 'success payout'}), 200)
                 else:
                     return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
-                                                         'в техническую поддержку'}), 403)
+                                                             'в техническую поддержку'}), 403)
             else:
                 return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
                                                          'в техническую поддержку'}))
@@ -563,11 +563,22 @@ class Payment(Resource):
 
 
 class ChangeUser(Resource):
-    def post(self, id): #user_id
-        user = UsersModel.query.get(id)
-        block_bet = request.json.get('block_bet', None)
-        payout_method = request.json.get('payout_method', None)
-        block_payout = request.json.get('block_payout', None)
+    def patch(self, id):  # user_id
+        try:
+            user = UsersModel.query.get(id)
+            action = request.json.get('action')
+            if action == 'block_payout':
+                user.block_payout = 0
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}))
+
+
+class BotMirror(Resource):
+    def post(self):
+        try:
+            pass
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}))
 
 
 class MyBets(Resource):
@@ -575,4 +586,3 @@ class MyBets(Resource):
     def get(self):
         my_bets = BetModel.query.filter_by(user_id=get_jwt_identity()).all()
         return MyBetSchema(many=True).dump(my_bets), 200
-
