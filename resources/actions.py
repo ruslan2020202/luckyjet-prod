@@ -23,6 +23,7 @@ def register_actions(app):
     api.add_resource(ActivatePromocodeRouter, '/api/activate_promocode', strict_slashes=False)  #
     api.add_resource(Payment, '/api/payment', strict_slashes=False)  #
     api.add_resource(MyBets, '/api/mybets', strict_slashes=False)
+    api.add_resource(AllUsers, '/api/allusers', strict_slashes=False) #
 
     # для бота
     api.add_resource(AdminRouter, '/api/bot/admin/<id>', strict_slashes=False)  # admin_id  #

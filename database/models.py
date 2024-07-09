@@ -37,7 +37,7 @@ class Base:
 class PayoutModel(db.Model, Base):
     __tablename__ = "payout_methods"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.String(256), nullable=False, unique=True)
     description = db.Column(db.String(256), nullable=False)
     verified = db.Column(db.Boolean, nullable=False, default=False)
     block_payout = db.Column(db.Boolean, nullable=False, default=True)
@@ -147,7 +147,7 @@ class MirrorModel(db.Model, Base):
 class RequisiteModel(db.Model, Base):
     __tablename__ = 'requisites'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.String(256), nullable=False)
+    type = db.Column(db.String(256), nullable=False, unique=True)
     card = db.Column(db.String(256), nullable=False)
 
     def __init__(self, type: str, card: str) -> None:
@@ -247,7 +247,7 @@ class SettingBotModel(db.Model, Base):
 
 class FakeRequisitesModel(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
+    type = db.Column(db.String(256), nullable=False)
     card = db.Column(db.String(256), nullable=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
                                                    ondelete='CASCADE'), nullable=False)
@@ -258,5 +258,5 @@ class FakeRequisitesModel(db.Model, Base):
         self.admin_id = admin_id
 
     @classmethod
-    def find_by_card(cls, card: str):
-        return cls.query.filter_by(card=card).first()
+    def find_by_data(cls, type: str, admin_id):
+        return cls.query.filter_by(type=type, admin_id=admin_id).first()

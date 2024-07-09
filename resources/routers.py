@@ -566,12 +566,40 @@ class ChangeUser(Resource):
     def patch(self, id):  # user_id
         try:
             user = UsersModel.query.get(id)
+            if not user:
+                return make_response(jsonify({'error': 'not found user'}), 404)
             action = request.json.get('action')
             if action == 'block_payout':
-                user.block_payout = 0
+                user.block_payout = not user.block_payout
+                user.save()
+                return make_response(jsonify({'message': "success"}), 200)
+            elif action == 'block_bet':
+                user.block_bet = not user.block_bet
+                user.save()
+                return make_response(jsonify({'message': "success"}), 200)
+            elif action == 'verification':
+                user.verification = not user.verification
+                user.save()
+                return make_response(jsonify({'message': "success"}), 200)
+            elif action == 'payout_method':
+                user.payout_method_id += 1
+                if user.payout_method_id == 5:
+                    user.payout_method_id = 1
+                user.save()
+                return make_response(jsonify({'message': "success"}), 200)
+            else:
+                return make_response(jsonify({'error': 'not correct action'}), 404)
         except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
+            return make_response(jsonify({'error': str(e)}), 500)
 
+
+class AllUsers(Resource):
+    def get(self):
+        try:
+            users = UsersModel.query.all()
+            return UserSchema(many=True).dump(users)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
 
 class BotMirror(Resource):
     def post(self):
