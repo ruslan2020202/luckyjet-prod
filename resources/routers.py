@@ -592,6 +592,17 @@ class ChangeUser(Resource):
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
 
+    def delete(self, id):
+        try:
+            user = UsersModel.query.get(id)
+            if not user:
+                return make_response(jsonify({'error': 'not found user'}), 404)
+            user.referal = None
+            user.save()
+            return make_response(jsonify({'message': "success"}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
 
 class AllUsers(Resource):
     def get(self):
@@ -600,6 +611,7 @@ class AllUsers(Resource):
             return UserSchema(many=True).dump(users)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
+
 
 class BotMirror(Resource):
     def post(self):
