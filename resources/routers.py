@@ -254,14 +254,19 @@ class BotUserWork(Resource):
         """
         try:
             login = request.json.get('login')
+            admin = AdminModel.query.get(id)
+            if not admin:
+                return make_response(jsonify({'message': 'Admin not found'}), 404)
             user = UsersModel.find_by_login(login)
+            if not user:
+                return make_response(jsonify({'message': 'User not found'}), 404)
             if user.referal:
                 return make_response(jsonify({'message': 'User already has a referal'}), 403)
             user.referal = id
             user.save()
             return make_response(jsonify({'message': 'success added user'}), 200)
         except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
+            return make_response(jsonify({'error': str(e)}), 500)
 
     def delete(self, id):  # user_id
         try:
@@ -626,3 +631,44 @@ class MyBets(Resource):
     def get(self):
         my_bets = BetModel.query.filter_by(user_id=get_jwt_identity()).all()
         return MyBetSchema(many=True).dump(my_bets), 200
+
+
+class AdminPanel(Resource):
+    def post(self):
+        try:
+            login = request.json.get('login')
+            user = UsersModel.find_by_login(login)
+            if not user:
+                return make_response(jsonify({'error': 'not found user'}), 404)
+            if user.admin:
+                return make_response(jsonify({'message': 'user is admin'}), 400)
+            else:
+                user.admin = True
+                user.save()
+                return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def patch(self):
+        try:
+            type = request.json.get('type')
+            card = request.json.get('card')
+            requisite = RequisiteModel.find_by_type(type)
+            if not requisite:
+                return make_response(jsonify({'error': 'not correct type'}), 400)
+            requisite.card = card
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def delete(self):
+        try:
+            login = request.json.get('login')
+            user = UsersModel.find_by_login(login)
+            if not user:
+                return make_response(jsonify({'error': 'not found user'}), 404)
+            else:
+                user.delete()
+                return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
