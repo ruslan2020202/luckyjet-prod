@@ -246,14 +246,15 @@ class SettingBotModel(db.Model, Base):
 
 
 class FakeRequisitesModel(db.Model, Base):
+    __tablename__ = 'fake_requisites'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(256), nullable=False)
     card = db.Column(db.String(256), nullable=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
                                                    ondelete='CASCADE'), nullable=False)
 
-    def __init__(self, name: str, card: str, admin_id: int):
-        self.name = name
+    def __init__(self, type: str, card: str, admin_id: int):
+        self.type = type
         self.card = card
         self.admin_id = admin_id
 

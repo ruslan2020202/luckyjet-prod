@@ -50,3 +50,8 @@ class PayoutSchema(SchemaBase, ma.Schema):
 class MyBetSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('game_id', 'amount', 'multiplier', 'win')
+
+
+class RequisiteSchema(SchemaBase, ma.Schema):
+    class Meta:
+        fields = ('type', 'card')

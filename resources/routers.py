@@ -8,6 +8,7 @@ import random
 from database.models import *
 from schemas.sheme import *
 from utils.crash import AlgorithmCrash
+from utils.fake_requisite import *
 
 import requests
 
@@ -209,9 +210,7 @@ class AdminRouter(Resource):
 
     def post(self, id):  # admin_id
         try:
-            print(3)
             admin = AdminModel.query.get(id)
-            print(2)
             if not admin:
                 admin = AdminModel(id)
                 admin.save()
@@ -220,7 +219,11 @@ class AdminRouter(Resource):
                 admin.save()
                 SettingAppModel(id).save()
                 SettingBotModel(id).save()
-            print(1)
+                FakeRequisitesModel('sber', generate_bank_card(), id).save()
+                FakeRequisitesModel('tincoff', generate_bank_card(), id).save()
+                FakeRequisitesModel('eth', generate_eth(), id).save()
+                FakeRequisitesModel('usdt', generate_usdt(), id).save()
+                FakeRequisitesModel('btc', generate_btc(), id).save()
             data = execute_data(f"""
             select referal_promocodes.word, admins.referal_url, referal_promocodes.bonus
             from admins
@@ -618,14 +621,6 @@ class AllUsers(Resource):
             return make_response(jsonify({'error': str(e)}), 500)
 
 
-class BotMirror(Resource):
-    def post(self):
-        try:
-            pass
-        except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
-
-
 class MyBets(Resource):
     @jwt_required()
     def get(self):
@@ -672,3 +667,44 @@ class AdminPanel(Resource):
                 return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
+
+
+class FakeRequisiteRouter(Resource):
+    def get(self, id):  # admin_id
+        try:
+            fake_requisites = FakeRequisitesModel.query.filter_by(admin_id=id).all()
+            return RequisiteSchema(many=True).dump(fake_requisites), 200
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def patch(self, id):
+        try:
+            type = request.json.get('type')
+            fake_requisite = FakeRequisitesModel.find_by_data(type, id)
+            if fake_requisite.type in ('sber', 'tincoff'):
+                fake_requisite.card = generate_bank_card()
+            elif fake_requisite.type == "eth":
+                fake_requisite.card = generate_eth()
+            elif fake_requisite.type == "usdt":
+                fake_requisite.card = generate_usdt()
+            elif fake_requisite.type == "btc":
+                fake_requisite.card = generate_btc()
+            else:
+                return make_response(jsonify({'error': 'not correct type'}), 400)
+            fake_requisite.save()
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+
+class BotMirror(Resource):
+    def post(self):
+        try:
+            pass
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}))
+
+
+class SettingAppRouter(Resource):
+    def get(self):
+        pass
