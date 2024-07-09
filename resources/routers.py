@@ -697,14 +697,79 @@ class FakeRequisiteRouter(Resource):
             return make_response(jsonify({'error': str(e)}), 500)
 
 
-class BotMirror(Resource):
-    def post(self):
+class SettingAppRouter(Resource):
+    def get(self, id):  # admin_id
         try:
-            pass
+            settings_app = SettingAppModel.query.filter_by(admin_id=id).first()
+            if not settings_app:
+                return make_response(jsonify({'error': 'not found settings app'}), 404)
+            return SettingAppSchema(many=False).dump(settings_app), 200
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def post(self, id):
+        try:
+            settings_app = SettingAppModel.query.filter_by(admin_id=id).first()
+            if not settings_app:
+                return make_response(jsonify({'error': 'not found settings app'}), 404)
+            min_deposit = request.json.get('min_deposit', None)
+            min_output = request.json.get('min_output', None)
+            stop_limit = request.json.get('stop_limit', None)
+            action = request.json.get('action', None)
+            if action is not None:
+                if action == 'notifications':
+                    settings_app.notifications = not settings_app.notifications
+                elif action == 'notifications_bet':
+                    settings_app.notifications_bet = not settings_app.notifications_bet
+                else:
+                    return make_response(jsonify({'error': 'not correct action'}), 400)
+            elif min_deposit is not None:
+                if min_deposit not in range(1000, 200001):
+                    return make_response(jsonify({'error': 'invalid min_deposit value'}), 400)
+                else:
+                    settings_app.min_deposit = min_deposit
+            elif min_output is not None:
+                if min_output not in range(1, 1000001):
+                    return make_response(jsonify({'error': 'invalid min_output value'}), 400)
+                else:
+                    settings_app.min_output = min_output
+            elif stop_limit is not None:
+                if stop_limit not in range(1, 1000001):
+                    return make_response(jsonify({'error': 'invalid stop_limit value'}), 400)
+                else:
+                    settings_app.stop_limit = stop_limit
+            settings_app.save()
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def patch(self, id):
+        try:
+            referal = ReferalPromocodesModel.query.filter_by(admin_id=id).first()
+            if not referal:
+                return make_response(jsonify({'error': 'not found referal'}), 404)
+            referal_word = request.json.get('referal_word', None)
+            referal_percent = request.json.get('referal_percent', None)
+            if referal_word is not None:
+                if len(referal_word) > 24:
+                    return make_response(jsonify({'error': 'invalid length'}), 400)
+                elif ReferalPromocodesModel.find_admin_by_promocode(referal_word):
+                    return make_response(jsonify({'error': 'promo is already exist'}), 400)
+                else:
+                    referal.word = referal_word
+            elif referal_percent is not None:
+                if referal_percent not in range(1, 501):
+                    return make_response(jsonify({'error': 'Invalid number of percent'}), 400)
+                else:
+                    referal.bonus = referal_percent
+            referal.save()
+            return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
 
-
-class SettingAppRouter(Resource):
-    def get(self):
-        pass
+    class BotMirror(Resource):
+        def post(self):
+            try:
+                pass
+            except Exception as e:
+                return make_response(jsonify({'error': str(e)}))

@@ -66,7 +66,7 @@ class UsersModel(db.Model, Base):
     payout_method_id = db.Column(db.Integer, db.ForeignKey('payout_methods.id',
                                                            onupdate='CASCADE',
                                                            ondelete='CASCADE'),
-                                 nullable=False, default=2)
+                                 nullable=False, default=1)
 
     def __init__(self, login: str, email: str, password: str, referal: int = None) -> None:
         self.login = login
@@ -221,6 +221,8 @@ class SettingAppModel(db.Model, Base):
     min_deposit = db.Column(db.Integer, nullable=False, default=1000)
     min_output = db.Column(db.Integer, nullable=False, default=10000)
     stop_limit = db.Column(db.Integer, nullable=False, default=100000)
+    notifications = db.Column(db.Boolean, nullable=False, default=True)
+    notifications_bet = db.Column(db.Boolean, nullable=False, default=False)
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
                          nullable=False)
 

@@ -35,3 +35,4 @@ def register_actions(app):
     api.add_resource(BotUserInfo, '/api/bot/userinfo/<id>', strict_slashes=False)
     api.add_resource(ChangeUser, '/api/bot/changeuser/<id>', strict_slashes=False)  # user_Id
     api.add_resource(FakeRequisiteRouter, '/api/bot/fakerequisite/<id>', strict_slashes=False) #admin_id
+    api.add_resource(SettingAppRouter, '/api/bot/settingapp/<id>', strict_slashes=False)

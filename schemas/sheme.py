@@ -55,3 +55,8 @@ class MyBetSchema(SchemaBase, ma.Schema):
 class RequisiteSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('type', 'card')
+
+
+class SettingAppSchema(SchemaBase, ma.Schema):
+    class Meta:
+        fields = ('min_deposit', 'min_output', 'stop_limit', 'notifications', 'notifications_bet')
