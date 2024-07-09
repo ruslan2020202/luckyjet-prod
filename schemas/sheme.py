@@ -12,7 +12,7 @@ class SchemaBase(ma.Schema):
 
 class UserSchema(SchemaBase, ma.Schema):
     class Meta:
-        fields = ('id', 'balance', 'block_bet', 'block_payout',
+        fields = ('id', 'balance', 'admin', 'block_bet', 'block_payout',
                   'email', 'login', 'payout_method', 'referal',
                   'verification', '_id')
 

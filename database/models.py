@@ -17,11 +17,11 @@ def execute_data(query: str):
     return result.fetchall()
 
 
-# @event.listens_for(Engine, "connect")
-# def set_sqlite_pragma(dbapi_connection, connection_record):
-#     cursor = dbapi_connection.cursor()
-#     cursor.execute("PRAGMA foreign_keys=ON")
-#     cursor.close()
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 class Base:
@@ -56,7 +56,7 @@ class UsersModel(db.Model, Base):
     email = db.Column(db.String(256), nullable=False, unique=True)
     password = db.Column(db.String(256), nullable=False)
     balance = db.Column(db.Float, nullable=False, default=0)
-    # admin = db.Column(db.Boolean, default=False)
+    admin = db.Column(db.Boolean, default=False)
     block_bet = db.Column(db.Boolean, nullable=False, default=False)
     block_payout = db.Column(db.Boolean, nullable=False, default=False)
     referal = db.Column(db.Integer, db.ForeignKey('admins.telegram_id',
@@ -82,9 +82,10 @@ class UsersModel(db.Model, Base):
 
 class GameModel(db.Model, Base):
     __tablename__ = 'games'
-    id = db.Column(db.Integer, primary_key=True)
+    _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     multiplier = db.Column(db.Integer, nullable=False, default=0.0)  # Изменено на nullable=True
     status = db.Column(db.Boolean, nullable=False, default=True)
+    id = db.Column(db.Integer)
 
     def __init__(self, id: int, multiplier: int = None) -> None:
         self.id = id
@@ -96,7 +97,7 @@ class BetModel(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', onupdate='CASCADE',
                                                   ondelete='CASCADE'), nullable=False)
-    game_id = db.Column(db.Integer, db.ForeignKey('games.id', onupdate='CASCADE', ondelete='CASCADE'))
+    game_id = db.Column(db.Integer)
     amount = db.Column(db.Integer, nullable=False)
     multiplier = db.Column(db.Float, default=1)
     win = db.Column(db.Boolean, nullable=False, default=False)

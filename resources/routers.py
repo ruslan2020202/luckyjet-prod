@@ -111,7 +111,6 @@ class BetRouter(Resource):
     @jwt_required()
     def post(self, id):
         try:
-            print(1)
             amount = int(request.json.get('amount'))
             user = UsersModel.query.get(get_jwt_identity())
             if user.block_bet:
@@ -181,10 +180,11 @@ class HistoryGames(Resource):
             games = execute_data("""
             select id, multiplier
             from games
-            where status = False
-            order by id desc
+            where multiplier != 0
+            order by _id desc 
             limit 23
             """)
+            # print(games)
             return GameSchema(many=True).dump(games), 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
@@ -316,10 +316,10 @@ class SignalRouter(Resource):
     def get(self):
         try:
             data = execute_data("""
-            select * 
+            select id, multiplier
             from games
-            where status = False
-            order by id desc
+            where multiplier != 0
+            order by _id desc
             limit 1
             """)
             if not data:
