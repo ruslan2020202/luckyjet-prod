@@ -793,3 +793,12 @@ class BotMirror(Resource):
                 return make_response(jsonify({'error': 'not found bot'}), 404)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
+
+    def delete(self, id): #admin_id
+        try:
+            token = request.json.get('token')
+            bot = MirrorBotModel.find_by_data(token, id)
+            bot.delete()
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)

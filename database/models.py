@@ -266,6 +266,10 @@ class MirrorBotModel(db.Model, Base):
         self.url = f'@{username}'
         self.admin_id = admin_id
 
+    @classmethod
+    def find_by_data(cls, token: str, admin_id):
+        return cls.query.filter_by(token=token, admin_id=admin_id).first()
+
 
 # class UsersSignalsModel(db.Model, Base):
 #     __tablename__ = 'users_signals'
