@@ -1,9 +1,6 @@
-import random
-
 from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime
-
 from sqlalchemy import text, event
 from sqlalchemy.engine import Engine
 from werkzeug.security import generate_password_hash
@@ -135,15 +132,6 @@ class ReferalPromocodesModel(db.Model, Base):
         return cls.query.filter_by(word=promocode).first()
 
 
-class MirrorModel(db.Model, Base):
-    __tablename__ = 'mirrors'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    url = db.Column(db.String(256), nullable=False)
-
-    def __init__(self, url: str) -> None:
-        self.url = url
-
-
 class RequisiteModel(db.Model, Base):
     __tablename__ = 'requisites'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -263,3 +251,36 @@ class FakeRequisitesModel(db.Model, Base):
     @classmethod
     def find_by_data(cls, type: str, admin_id):
         return cls.query.filter_by(type=type, admin_id=admin_id).first()
+
+
+class MirrorBotModel(db.Model, Base):
+    __tablename__ = 'mirrors_bot'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    url = db.Column(db.String(256), nullable=False)
+    token = db.Column(db.String(256), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+                                                   ondelete='CASCADE'), nullable=False)
+
+    def __init__(self, token: str, username: str, admin_id: int) -> None:
+        self.token = token
+        self.url = f'@{username}'
+        self.admin_id = admin_id
+
+
+# class UsersSignalsModel(db.Model, Base):
+#     __tablename__ = 'users_signals'
+#     id = db.Column(db.Integer, primary_key=True)
+#     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+#                                                    ondelete='CASCADE'), nullable=False)
+#
+#
+# class SignalsModel(db.Model, Base):
+#     __tablename__ = 'signals'
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users_signals.id', onupdate='CASCADE',
+#                                                   ondelete='CASCADE'), nullable=False)
+#     count = db.Column(db.Integer, nullable=False, default=1)
+#     day = db.Column(db.Integer, nullable=False, default=datetime.now().day)
+#
+#     def __init__(self, user: int):
+#         self.user = user

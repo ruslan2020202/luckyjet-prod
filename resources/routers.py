@@ -321,8 +321,21 @@ class BalanceRouter(Resource):
 
 
 class SignalRouter(Resource):
-    def get(self):
+    def post(self, id): # telegram_id by user
         try:
+            # admin_id = request.json.get('admin_id')
+            # user = SignalsModel.query.filter_by(user=id).first()
+            # if not user:
+            #     user = SignalsModel(id)
+            #     user.save()
+            # if user.day != datetime.now().day:
+            #     user.day = datetime.now().day
+            #     user.count = 0
+            #     user.save()
+            # else:
+            #     if user.count:
+            #         pass
+
             data = execute_data("""
             select id, multiplier
             from games
@@ -330,8 +343,6 @@ class SignalRouter(Resource):
             order by _id desc
             limit 1
             """)
-            if not data:
-                return make_response(jsonify({'message': 'Game over'}), 400)
             return GameSchema(many=True).dump(data), 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
@@ -765,11 +776,20 @@ class SettingAppRouter(Resource):
             referal.save()
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
+            return make_response(jsonify({'error': str(e)}), 500)
 
-    class BotMirror(Resource):
-        def post(self):
-            try:
-                pass
-            except Exception as e:
-                return make_response(jsonify({'error': str(e)}))
+
+class BotMirror(Resource):
+    def post(self, id): # admin_id
+        try:
+            token = request.json.get('token')
+            res = requests.get(f'https://api.telegram.org/bot{token}/getMe')
+            bot = res.json()
+            if bot['ok']:
+                username = bot['result']['username']
+                MirrorBotModel(token, username, id).save()
+                return make_response(jsonify({'message': 'success'}), 200)
+            else:
+                return make_response(jsonify({'error': 'not found bot'}), 404)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
