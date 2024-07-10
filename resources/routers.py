@@ -323,28 +323,33 @@ class BalanceRouter(Resource):
 class SignalRouter(Resource):
     def post(self, id):  # telegram_id by user
         try:
-            admin_id = request.json.get('admin_id')
+            admin_id = request.json.get('admin_id', None)
+            data = execute_data("""
+                                select id, multiplier
+                                from games
+                                where multiplier != 0
+                                order by _id desc
+                                limit 1
+                                """)
+            result = GameSchema(many=True).dump(data)
+            game_id = result['game_id']
             user = UsersSignalsModel.query.get(id)
             if not user:
-                user = UsersSignalsModel(id=id, admin_id=admin_id)
+                user = UsersSignalsModel(id, admin_id, game_id)
                 user.save()
-            signal = SignalsModel.query.filter_by(user_id=id)
-            if signal.day != datetime.now().day:
-                signal.day = datetime.now().day
-                signal.count = 0
-                signal.save()
+            if user.day != datetime.now().day:
+                user.day = datetime.now().day
+                user.count = 0
+                user.save()
             else:
-                if signal.count == SettingBotModel.query.filter_by(admin_id=user.admin_id).first().count_signals:
+                if user.count == SettingBotModel.query.filter_by(admin_id=user.admin_id).first().count_signals:
                     return make_response(jsonify({'error': 'limited number of signals'}))
-
-            data = execute_data("""
-            select id, multiplier
-            from games
-            where multiplier != 0
-            order by _id desc
-            limit 1
-            """)
-            return GameSchema(many=True).dump(data), 200
+                # elif :
+                #     pass
+                else:
+                    user.count += 1
+                    user.save()
+                    return result, 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
 
@@ -795,8 +800,12 @@ class BotMirror(Resource):
             bot = res.json()
             if bot['ok']:
                 username = bot['result']['username']
-                MirrorBotModel(token, username, id).save()
-                return make_response(jsonify({'message': 'success'}), 200)
+                find = MirrorBotModel.find_by_data(token, id)
+                if not find:
+                    MirrorBotModel(token, username, id).save()
+                    return make_response(jsonify({'message': 'success'}), 200)
+                else:
+                    return make_response(jsonify({'message':'bot already exists'}), 400)
             else:
                 return make_response(jsonify({'error': 'not found bot'}), 404)
         except Exception as e:
@@ -804,8 +813,8 @@ class BotMirror(Resource):
 
     def delete(self, id):  # admin_id
         try:
-            url = request.json.get('url')
-            bot = MirrorBotModel.find_by_data(url, id)
+            token = request.json.get('token')
+            bot = MirrorBotModel.find_by_data(token, id)
             bot.delete()
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
