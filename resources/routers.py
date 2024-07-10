@@ -846,6 +846,8 @@ class BotSettingRouter(Resource):
     def post(self, id):
         try:
             message_all = request.json.get('message_all', None)
+            count_signals = request.json.get('count_signals', None)
+            settings_bot = SettingBotModel.query.filter_by(admin_id=id).first()
             if message_all is not None:
                 all_users = UsersSignalsModel.query.filter_by(admin_id=id).all()
                 mirrors_bot = MirrorBotModel.query.filter_by(admin_id=id).all()
@@ -855,6 +857,17 @@ class BotSettingRouter(Resource):
                             "chat_id": j.user_id,
                             "text": message_all
                         }
-                        requests.post(f'https://api.telegram.org/bot{i.token}/sendMessage', json=data)
+                        res = requests.post(f'https://api.telegram.org/bot{i.token}/sendMessage', json=data)
+                        if res.json()['ok']:
+                            return make_response(jsonify({'message': 'success'}), 200)
+                        else:
+                            return make_response(jsonify({'message': 'failed'}), 400)
+            # elif count_signals is not None:
+            #     if count_signals in range(1, 101):
+            #         settings_bot.count_signals = count_signals
+            #     else:
+            #         return make_response(jsonify({'error': 'limit reached'}), 400)
+            # settings_bot.save()
+            # return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
