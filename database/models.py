@@ -267,24 +267,28 @@ class MirrorBotModel(db.Model, Base):
         self.admin_id = admin_id
 
     @classmethod
-    def find_by_data(cls, token: str, admin_id):
-        return cls.query.filter_by(token=token, admin_id=admin_id).first()
+    def find_by_data(cls, url: str, admin_id):
+        return cls.query.filter_by(token=url, admin_id=admin_id).first()
 
 
-# class UsersSignalsModel(db.Model, Base):
-#     __tablename__ = 'users_signals'
-#     id = db.Column(db.Integer, primary_key=True)
-#     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
-#                                                    ondelete='CASCADE'), nullable=False)
-#
-#
-# class SignalsModel(db.Model, Base):
-#     __tablename__ = 'signals'
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('users_signals.id', onupdate='CASCADE',
-#                                                   ondelete='CASCADE'), nullable=False)
-#     count = db.Column(db.Integer, nullable=False, default=1)
-#     day = db.Column(db.Integer, nullable=False, default=datetime.now().day)
-#
-#     def __init__(self, user: int):
-#         self.user = user
+class UsersSignalsModel(db.Model, Base):
+    __tablename__ = 'users_signals'
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+                                                   ondelete='CASCADE'), nullable=False)
+
+    def __init__(self, id: int, admin_id: int) -> None:
+        self.id = id
+        self.admin_id = admin_id
+
+
+class SignalsModel(db.Model, Base):
+    __tablename__ = 'signals'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users_signals.id', onupdate='CASCADE',
+                                                  ondelete='CASCADE'), nullable=False)
+    count = db.Column(db.Integer, nullable=False, default=1)
+    day = db.Column(db.Integer, nullable=False, default=datetime.now().day)
+
+    def __init__(self, user: int):
+        self.user = user

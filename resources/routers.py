@@ -321,20 +321,21 @@ class BalanceRouter(Resource):
 
 
 class SignalRouter(Resource):
-    def post(self, id): # telegram_id by user
+    def post(self, id):  # telegram_id by user
         try:
-            # admin_id = request.json.get('admin_id')
-            # user = SignalsModel.query.filter_by(user=id).first()
-            # if not user:
-            #     user = SignalsModel(id)
-            #     user.save()
-            # if user.day != datetime.now().day:
-            #     user.day = datetime.now().day
-            #     user.count = 0
-            #     user.save()
-            # else:
-            #     if user.count:
-            #         pass
+            admin_id = request.json.get('admin_id')
+            user = UsersSignalsModel.query.get(id)
+            if not user:
+                user = UsersSignalsModel(id=id, admin_id=admin_id)
+                user.save()
+            signal = SignalsModel.query.filter_by(user_id=id)
+            if signal.day != datetime.now().day:
+                signal.day = datetime.now().day
+                signal.count = 0
+                signal.save()
+            else:
+                if signal.count == SettingBotModel.query.filter_by(admin_id=user.admin_id).first().count_signals:
+                    return make_response(jsonify({'error': 'limited number of signals'}))
 
             data = execute_data("""
             select id, multiplier
@@ -780,7 +781,14 @@ class SettingAppRouter(Resource):
 
 
 class BotMirror(Resource):
-    def post(self, id): # admin_id
+    def get(self, id):  # admin_id
+        try:
+            bots = MirrorBotModel.query.filter_by(admin_id=id).all()
+            return BotSchema(many=True).dump(bots), 200
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def post(self, id):  # admin_id
         try:
             token = request.json.get('token')
             res = requests.get(f'https://api.telegram.org/bot{token}/getMe')
@@ -794,10 +802,10 @@ class BotMirror(Resource):
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
 
-    def delete(self, id): #admin_id
+    def delete(self, id):  # admin_id
         try:
-            token = request.json.get('token')
-            bot = MirrorBotModel.find_by_data(token, id)
+            url = request.json.get('url')
+            bot = MirrorBotModel.find_by_data(url, id)
             bot.delete()
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:

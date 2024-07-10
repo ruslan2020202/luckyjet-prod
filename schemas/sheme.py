@@ -60,3 +60,8 @@ class RequisiteSchema(SchemaBase, ma.Schema):
 class SettingAppSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('min_deposit', 'min_output', 'stop_limit', 'notifications', 'notifications_bet')
+
+
+class BotSchema(SchemaBase, ma.Schema):
+    class Meta:
+        fields = ('url', 'token')
