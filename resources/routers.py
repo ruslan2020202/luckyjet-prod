@@ -840,3 +840,21 @@ class BotMirror(Resource):
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
+
+
+class BotSettingRouter(Resource):
+    def post(self, id):
+        try:
+            message_all = request.json.get('message_all', None)
+            if message_all is not None:
+                all_users = UsersSignalsModel.query.filter_by(admin_id=id).all()
+                mirrors_bot = MirrorBotModel.query.filter_by(admin_id=id).all()
+                for i in mirrors_bot:
+                    for j in all_users:
+                        data = {
+                            "chat_id": j.user_id,
+                            "text": message_all
+                        }
+                        requests.post(f'https://api.telegram.org/bot{i.token}/sendMessage', json=data)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
