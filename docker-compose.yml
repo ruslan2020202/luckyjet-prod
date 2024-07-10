@@ -47,6 +47,15 @@ services:
     depends_on:
       - app
 
+  signal_bot:
+    build:
+      context: ./signal_bot
+    container_name: signal_bot
+    depends_on:
+      - app
+    restart: always
+
+
 networks:
   web:
     driver: bridge
