@@ -65,3 +65,4 @@ class SettingAppSchema(SchemaBase, ma.Schema):
 class BotSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('url', 'token')
+

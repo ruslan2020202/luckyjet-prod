@@ -843,13 +843,22 @@ class BotMirror(Resource):
 
 
 class BotSettingRouter(Resource):
+    def get(self, id):
+        try:
+            settings_bot = SettingBotModel.query.filter_by(admin_id=id).first()
+            return make_response(jsonify({'count_signals': settings_bot.count_signals}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
     def post(self, id):
         try:
             message_all = request.json.get('message_all', None)
             count_signals = request.json.get('count_signals', None)
+            support_bot = request.json.get('support_bot', None)
+            action = request.json.get('action', None)  # update_signals or referal_system
             settings_bot = SettingBotModel.query.filter_by(admin_id=id).first()
+            all_users = UsersSignalsModel.query.filter_by(admin_id=id).all()
             if message_all is not None:
-                all_users = UsersSignalsModel.query.filter_by(admin_id=id).all()
                 mirrors_bot = MirrorBotModel.query.filter_by(admin_id=id).all()
                 for i in mirrors_bot:
                     for j in all_users:
@@ -862,12 +871,41 @@ class BotSettingRouter(Resource):
                             return make_response(jsonify({'message': 'success'}), 200)
                         else:
                             return make_response(jsonify({'message': 'failed'}), 400)
-            # elif count_signals is not None:
-            #     if count_signals in range(1, 101):
-            #         settings_bot.count_signals = count_signals
-            #     else:
-            #         return make_response(jsonify({'error': 'limit reached'}), 400)
-            # settings_bot.save()
-            # return make_response(jsonify({'message': 'success'}), 200)
+            elif count_signals is not None:
+                if count_signals in range(1, 101):
+                    settings_bot.count_signals = count_signals
+                else:
+                    return make_response(jsonify({'error': 'limit reached'}), 400)
+            elif support_bot is not None:
+                support_surname = support_bot if str(support_bot)[0] == '@' else f'@{support_bot}'
+                settings_bot.support = support_surname
+            if action is not None:
+                if action == 'update_signals':
+                    try:
+                        for i in all_users:
+                            i.count = 0
+                            i.save()
+                        return make_response(jsonify({'message': 'success'}), 200)
+                    except Exception as e:
+                        return make_response(jsonify({'error': ''}))
+                elif action == 'referal_system':
+                    settings_bot.referal_system = not settings_bot.referal_system
+                else:
+                    return make_response(jsonify({'error': 'not correct action'}), 400)
+            settings_bot.save()
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def delete(self, id):
+        try:
+            action = request.args.get('action')
+            settings_bot = SettingBotModel.query.filter_by(admin_id=id).first()
+            if action == 'delete_support':
+                settings_bot.support = None
+            else:
+                return make_response(jsonify({'error': 'not correct action'}), 400)
+            settings_bot.save()
+            return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
