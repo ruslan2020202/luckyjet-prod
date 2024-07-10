@@ -317,41 +317,62 @@ class BalanceRouter(Resource):
             user.save()
             return make_response(jsonify({'message': 'success delete balance'}), 200)
         except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
+            return make_response(jsonify({'error': str(e)}), 500)
 
 
 class SignalRouter(Resource):
-    def post(self, id):  # telegram_id by user
+    def get(self, id):  # telegram_id by user
         try:
-            admin_id = request.json.get('admin_id', None)
             data = execute_data("""
-                                select id, multiplier
-                                from games
-                                where multiplier != 0
-                                order by _id desc
-                                limit 1
-                                """)
+                                            select id, multiplier
+                                            from games
+                                            where multiplier != 0
+                                            order by _id desc
+                                            limit 1
+                                            """)
+            if not data:
+                return make_response(jsonify({'error': 'not found games'}), 404)
             result = GameSchema(many=True).dump(data)
-            game_id = result['game_id']
+            print(result)
+            game_id = result[0]['id']
             user = UsersSignalsModel.query.get(id)
             if not user:
-                user = UsersSignalsModel(id, admin_id, game_id)
+                user = UsersSignalsModel(id)
                 user.save()
             if user.day != datetime.now().day:
                 user.day = datetime.now().day
                 user.count = 0
                 user.save()
             else:
-                if user.count == SettingBotModel.query.filter_by(admin_id=user.admin_id).first().count_signals:
-                    return make_response(jsonify({'error': 'limited number of signals'}))
-                # elif :
-                #     pass
+                if user.admin_id:
+                    if user.count == SettingBotModel.query.filter_by(admin_id=user.admin_id).first().count_signals:
+                        return make_response(jsonify({'error': 'limited number of signals'}), 403)
+                else:
+                    if user.count == 5:
+                        return make_response(jsonify({'error': 'limited number of signals'}), 403)
+                if game_id == user.game_id:
+                    return make_response(jsonify({'error': 'you have already received a signal for this game'}), 400)
                 else:
                     user.count += 1
+                    user.game_id = game_id
                     user.save()
                     return result, 200
         except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
+            return make_response(jsonify({'error': str(e)}), 500)
+
+    def post(self, id):  # telegram_id by user
+        try:
+            admin_id = request.json.get('admin_id', None)
+            user = UsersSignalsModel.query.get(id)
+            if not user:
+                if not admin_id:
+                    user = UsersSignalsModel(id, admin_id)
+                else:
+                    user = UsersSignalsModel(id)
+            user.save()
+            return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
 
 
 class PromocodeRouter(Resource):
@@ -805,7 +826,7 @@ class BotMirror(Resource):
                     MirrorBotModel(token, username, id).save()
                     return make_response(jsonify({'message': 'success'}), 200)
                 else:
-                    return make_response(jsonify({'message':'bot already exists'}), 400)
+                    return make_response(jsonify({'message': 'bot already exists'}), 400)
             else:
                 return make_response(jsonify({'error': 'not found bot'}), 404)
         except Exception as e:

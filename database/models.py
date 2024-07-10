@@ -275,12 +275,12 @@ class UsersSignalsModel(db.Model, Base):
     __tablename__ = 'users_signals'
     user_id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
-                                                   ondelete='CASCADE'), nullable=False)
-    game_id = db.Column(db.Integer)
+                                                   ondelete='CASCADE'))
+    game_id = db.Column(db.Integer, default=0, nullable=False)
     count = db.Column(db.Integer, nullable=False, default=1)
     day = db.Column(db.Integer, nullable=False, default=datetime.now().day)
 
-    def __init__(self, user_id: int, admin_id: int, game_id: int = None) -> None:
+    def __init__(self, user_id: int, admin_id: int=None, game_id: int = None) -> None:
         self.user_id = user_id
         self.admin_id = admin_id
         if game_id is not None:
