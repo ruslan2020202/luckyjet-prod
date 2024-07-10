@@ -366,9 +366,9 @@ class SignalRouter(Resource):
             user = UsersSignalsModel.query.get(id)
             if not user:
                 if not admin_id:
-                    user = UsersSignalsModel(id, admin_id)
-                else:
                     user = UsersSignalsModel(id)
+                else:
+                    user = UsersSignalsModel(id, admin_id)
             user.save()
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
