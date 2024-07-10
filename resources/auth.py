@@ -5,6 +5,8 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 
 from database.models import *
 from schemas.sheme import UserSchema
+from utils.send_message import *
+
 
 
 class SignUp(Resource):
@@ -24,6 +26,11 @@ class SignUp(Resource):
                         return make_response(jsonify({'error': 'not correct promo code'}), 401)
                     else:
                         user = UsersModel(login, email, password, referal.admin_id)
+                        if SettingAppModel.query.filter_by(referal.admin_id).first().notifications:
+                            msg = f"""
+                            ℹ️ Мамонт  user123123 зарегистрировался на сайте
+                            """
+                            send_message(msg, user.referal)
                 user.save()
                 return make_response(jsonify({'message': 'success'}), 201)
             else:

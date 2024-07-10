@@ -24,7 +24,7 @@ class GameSchema(SchemaBase, ma.Schema):
 
 class AdminSchema(SchemaBase, ma.Schema):
     class Meta:
-        fields = ('word', 'referal_url', 'bonus')
+        fields = ('word', 'referal_url', 'bonus', 'referal_system')
 
 
 class BetSchema(SchemaBase, ma.Schema):
@@ -66,3 +66,7 @@ class BotSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('url', 'token')
 
+
+class SettingBotSchema(SchemaBase, ma.Schema):
+    class Meta:
+        fields = ('count_signals', 'referal_system')

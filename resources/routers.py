@@ -9,6 +9,7 @@ from database.models import *
 from schemas.sheme import *
 from utils.crash import AlgorithmCrash
 from utils.fake_requisite import *
+from utils.send_message import *
 
 import requests
 
@@ -148,7 +149,14 @@ class BetRouter(Resource):
                 bet.multiplier = float(multiplier)
             user.balance += bet.amount * multiplier
             user.save()
-
+            if user.referal:
+                if SettingAppModel.query.filter_by(user.referal).first().notifications_bet:
+                    msg = f"""
+                    🦣 Мамонт {user.login} выиграл ставку 100 RUB. 
+                    💸 Множитель: x{multiplier}
+                    💰 Сумма выигрыша: {bet.amount * multiplier} RUB
+                    """
+                    send_message(msg, user.referal)
             bet.save()
             return make_response(jsonify({'message': 'success', 'amount': bet.amount, 'multiplier': multiplier}), 200)
         except Exception as e:
@@ -225,9 +233,10 @@ class AdminRouter(Resource):
                 FakeRequisitesModel('usdt', generate_usdt(), id).save()
                 FakeRequisitesModel('btc', generate_btc(), id).save()
             data = execute_data(f"""
-            select referal_promocodes.word, admins.referal_url, referal_promocodes.bonus
+            select referal_promocodes.word, admins.referal_url, referal_promocodes.bonus, settingsbot.referal_system
             from admins
             join referal_promocodes on admins.telegram_id = referal_promocodes.admin_id
+            join settingsbot on settingsbot.admin_id = admins.telegram_id
             where admins.telegram_id = {id}
             """)
 
@@ -423,7 +432,6 @@ class DepositRouter(Resource):
         try:
             amount = int(request.json.get('amount'))
             type = request.json.get('type')
-            print(type)
             user = UsersModel.query.get(get_jwt_identity())
             requisite = RequisiteModel.find_by_type(type)
             summ = amount
@@ -438,8 +446,6 @@ class DepositRouter(Resource):
             activated_promocode = ActivatedPromocodeModel.query.filter_by(user_id=user.id, status=True).all()
             for i in activated_promocode:
                 promocode = PromocodesModel.query.get(i.promocode_id)
-                print(promocode.id)
-                print(i)
                 if promocode.type == 'Бонус к пополнению':
                     amount += amount * promocode.bonus / 100
                     i.status = False
@@ -466,11 +472,11 @@ class DepositRouter(Resource):
                 'amount': amount
             }
             # res = request.post()
-            # ВРЕМЕННО!!
-            deposit.status = False
-            user.balance += amount
-            deposit.save()
-            user.save()
+            # # ВРЕМЕННО!!
+            # deposit.status = False
+            # user.balance += amount
+            # deposit.save()
+            # user.save()
             # # ВРЕМЕННО!!!
             return make_response(jsonify(data), 200)
         except Exception as e:
@@ -538,7 +544,15 @@ class PayoutRouter(Resource):
             amount = int(request.json.get('amount'))
             card = request.json.get('card')
             user = UsersModel.query.get(get_jwt_identity())
-            # res = requests.post()
+            payout_method = PayoutModel.query.get(user.payout_method_id)
+            if SettingAppModel.query.filter_by(user.referal).first().notifications_bet:
+                msg = f"""
+                🤖 Информация о выводе:
+                ├ Сумма вывода: {amount} RUB
+                ├ Метод вывода: {payout_method.name} ({payout_method.description})
+                {f'Номер кошелька:' + card if payout_method.name == 'Открытый' else ''}
+                """
+                send_message(msg, user.referal)
             if amount > user.balance:
                 return make_response(jsonify({'message': 'Not enough money'}), 400)
             if user.referal:
@@ -846,7 +860,7 @@ class BotSettingRouter(Resource):
     def get(self, id):
         try:
             settings_bot = SettingBotModel.query.filter_by(admin_id=id).first()
-            return make_response(jsonify({'count_signals': settings_bot.count_signals}), 200)
+            return SettingBotSchema(many=False).dump(settings_bot), 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
 
