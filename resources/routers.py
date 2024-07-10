@@ -233,7 +233,7 @@ class AdminRouter(Resource):
                 FakeRequisitesModel('usdt', generate_usdt(), id).save()
                 FakeRequisitesModel('btc', generate_btc(), id).save()
             data = execute_data(f"""
-            select referal_promocodes.word, admins.referal_url, referal_promocodes.bonus, settingsbot.referal_system
+            select referal_promocodes.word, admins.referal_url, referal_promocodes.bonus, settingsbot.support
             from admins
             join referal_promocodes on admins.telegram_id = referal_promocodes.admin_id
             join settingsbot on settingsbot.admin_id = admins.telegram_id
