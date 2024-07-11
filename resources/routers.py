@@ -471,12 +471,12 @@ class DepositRouter(Resource):
                 'user': user.login,
                 'amount': amount
             }
-            # res = request.post()
+            res = requests.post('http://main_bot:5001', json=data)
             # # ВРЕМЕННО!!
-            deposit.status = False
-            user.balance += amount
-            deposit.save()
-            user.save()
+            # deposit.status = False
+            # user.balance += amount
+            # deposit.save()
+            # user.save()
             # # ВРЕМЕННО!!!
             return make_response(jsonify(data), 200)
         except Exception as e:

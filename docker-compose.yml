@@ -59,6 +59,20 @@ services:
     links:
       - app
 
+  main_bot:
+    build:
+      context: ./main_bot
+    container_name: main_bot
+    depends_on:
+      - app
+    ports:
+      - "5001:5001"
+    restart: always
+    networks:
+      - web
+    links:
+      - app
+
 networks:
   web:
     driver: bridge
