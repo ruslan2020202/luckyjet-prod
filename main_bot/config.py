@@ -1,0 +1,2 @@
+TOKEN = "7377922109:AAFhQ3G2iIDgx5GvCD4_lTnP0Iiq-PUFo0g"
+URL = "http://app:5000"
