@@ -26,11 +26,12 @@ class SignUp(Resource):
                         return make_response(jsonify({'error': 'not correct promo code'}), 401)
                     else:
                         user = UsersModel(login, email, password, referal.admin_id)
-                        if SettingAppModel.query.filter_by(referal.admin_id).first().notifications:
+                        if SettingAppModel.query.filter_by(admin_id=referal.admin_id).first().notifications:
                             msg = f"""
                             ℹ️ Мамонт  user123123 зарегистрировался на сайте
                             """
-                            send_message(msg, user.referal)
+                            res = send_message(msg, referal.admin_id)
+                            print(res)
                 user.save()
                 return make_response(jsonify({'message': 'success'}), 201)
             else:

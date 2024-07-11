@@ -11,5 +11,14 @@ def send_message(message, recivient):
         "chat_id": recivient,
         "text": message
     }
-    res = requests.post(f'https://api.telegram.org/bot{os.environ.get(token)}/sendMessage')
+    res = requests.post(f'https://api.telegram.org/bot{token}/sendMessage', json=data)
     return res.json()
+
+if __name__ == '__main__':
+    msg = f"""
+                                ℹ️ Мамонт  user123123 зарегистрировался на сайте
+                                """
+    res = send_message(msg, 1733137028)
+    print(res)
+
+

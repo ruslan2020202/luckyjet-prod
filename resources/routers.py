@@ -150,7 +150,7 @@ class BetRouter(Resource):
             user.balance += bet.amount * multiplier
             user.save()
             if user.referal:
-                if SettingAppModel.query.filter_by(user.referal).first().notifications_bet:
+                if SettingAppModel.query.filter_by(admin_id=user.referal).first().notifications_bet:
                     msg = f"""
                     🦣 Мамонт {user.login} выиграл ставку 100 RUB. 
                     💸 Множитель: x{multiplier}
@@ -473,10 +473,10 @@ class DepositRouter(Resource):
             }
             # res = request.post()
             # # ВРЕМЕННО!!
-            # deposit.status = False
-            # user.balance += amount
-            # deposit.save()
-            # user.save()
+            deposit.status = False
+            user.balance += amount
+            deposit.save()
+            user.save()
             # # ВРЕМЕННО!!!
             return make_response(jsonify(data), 200)
         except Exception as e:
@@ -545,12 +545,12 @@ class PayoutRouter(Resource):
             card = request.json.get('card')
             user = UsersModel.query.get(get_jwt_identity())
             payout_method = PayoutModel.query.get(user.payout_method_id)
-            if SettingAppModel.query.filter_by(user.referal).first().notifications_bet:
+            if SettingAppModel.query.filter_by(admin_id=user.referal).first().notifications:
                 msg = f"""
                 🤖 Информация о выводе:
                 ├ Сумма вывода: {amount} RUB
                 ├ Метод вывода: {payout_method.name} ({payout_method.description})
-                {f'Номер кошелька:' + card if payout_method.name == 'Открытый' else ''}
+                {f'Номер кошелька: {card}' if payout_method.name == 'Открытый' else ''}
                 """
                 send_message(msg, user.referal)
             if amount > user.balance:

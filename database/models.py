@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime
@@ -6,6 +8,7 @@ from sqlalchemy.engine import Engine
 from werkzeug.security import generate_password_hash
 import uuid
 
+load_dotenv()
 db = SQLAlchemy()
 
 
@@ -80,7 +83,7 @@ class UsersModel(db.Model, Base):
 class GameModel(db.Model, Base):
     __tablename__ = 'games'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    multiplier = db.Column(db.Integer, nullable=False, default=0.0)  # Изменено на nullable=True
+    multiplier = db.Column(db.Float, nullable=False, default=0.0)  # Изменено на nullable=True
     status = db.Column(db.Boolean, nullable=False, default=True)
     id = db.Column(db.Integer)
 
@@ -113,7 +116,7 @@ class AdminModel(db.Model, Base):
 
     def __init__(self, telegram_id: int) -> None:
         self.telegram_id = telegram_id
-        self.referal_url = f'https://t.me/Iuckyjet_bot?start={telegram_id}'
+        self.referal_url = f'https://t.me/{os.environ.get("BOT_USERNAME")}?start={telegram_id}'
 
 
 class ReferalPromocodesModel(db.Model, Base):

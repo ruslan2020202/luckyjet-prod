@@ -16,6 +16,9 @@ if __name__ == '__main__':
         RequisiteModel('eth', '0x203626346af19EBf979025c5E1ce3D0cdA3bFe67').save()
         RequisiteModel('usdt', 'TSv2u6qdXMMVvJdWHSuVPD3XkwUybVkBDx').save()
         RequisiteModel('btc', 'bc1qzllzsaxzdc9t5055zpml5k8wsnmgye3t2w6jgf').save()
+        admin = UsersModel('admin', 'admin@gmail.com', 'admin')
+        admin.admin = True
+        admin.save()
 
 
 

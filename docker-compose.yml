@@ -54,7 +54,10 @@ services:
     depends_on:
       - app
     restart: always
-
+    networks:
+      - web
+    links:
+      - app
 
 networks:
   web:
