@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime
 from sqlalchemy import text, event
-from sqlalchemy.dialects.mysql import  BIGINT
+from sqlalchemy.dialects.mysql import BIGINT
 from sqlalchemy.engine import Engine
 from werkzeug.security import generate_password_hash
 import uuid
@@ -60,8 +60,8 @@ class UsersModel(db.Model, Base):
     admin = db.Column(db.Boolean, default=False)
     block_bet = db.Column(db.Boolean, nullable=False, default=False)
     block_payout = db.Column(db.Boolean, nullable=False, default=False)
-    referal = db.Column(db.Integer, db.ForeignKey('admins.telegram_id',
-                                                  onupdate='CASCADE', ondelete='CASCADE'))
+    referal = db.Column(BIGINT, db.ForeignKey('admins.telegram_id',
+                                              onupdate='CASCADE', ondelete='CASCADE'))
     verification = db.Column(db.Boolean, nullable=False, default=False)
     _id = db.Column(db.String(256), nullable=False, default=uuid.uuid4().hex)
     payout_method_id = db.Column(db.Integer, db.ForeignKey('payout_methods.id',
@@ -125,7 +125,7 @@ class ReferalPromocodesModel(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     word = db.Column(db.String(256), nullable=False)
     bonus = db.Column(db.Integer, nullable=False, default=100)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id'))
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id'))
 
     def __init__(self, number: int):
         self.word = 'luckyjet' + str(number)
@@ -173,7 +173,7 @@ class PromocodesModel(db.Model, Base):
     __tablename__ = "promocodes"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     word = db.Column(db.String(256), nullable=False)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
                          nullable=False)
     type = db.Column(db.String(256), nullable=False)
     bonus = db.Column(db.Integer, nullable=False)
@@ -215,7 +215,7 @@ class SettingAppModel(db.Model, Base):
     stop_limit = db.Column(db.Integer, nullable=False, default=100000)
     notifications = db.Column(db.Boolean, nullable=False, default=True)
     notifications_bet = db.Column(db.Boolean, nullable=False, default=False)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
                          nullable=False)
 
     def __init__(self, admin_id: int):
@@ -232,7 +232,7 @@ class SettingBotModel(db.Model, Base):
     count_signals = db.Column(db.Integer, nullable=False, default=5)
     support = db.Column(db.String(256))
     referal_system = db.Column(db.Boolean, nullable=False, default=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE', ondelete='CASCADE'),
                          nullable=False)
 
     def __init__(self, admin_id: int):
@@ -244,8 +244,8 @@ class FakeRequisitesModel(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(256), nullable=False)
     card = db.Column(db.String(256), nullable=False)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
-                                                   ondelete='CASCADE'), nullable=False)
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+                                               ondelete='CASCADE'), nullable=False)
 
     def __init__(self, type: str, card: str, admin_id: int):
         self.type = type
@@ -266,8 +266,8 @@ class MirrorBotModel(db.Model, Base):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     url = db.Column(db.String(256), nullable=False)
     token = db.Column(db.String(256), nullable=False)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
-                                                   ondelete='CASCADE'), nullable=False)
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+                                               ondelete='CASCADE'), nullable=False)
 
     def __init__(self, token: str, username: str, admin_id: int) -> None:
         self.token = token
@@ -281,14 +281,14 @@ class MirrorBotModel(db.Model, Base):
 
 class UsersSignalsModel(db.Model, Base):
     __tablename__ = 'users_signals'
-    user_id = db.Column(db.Integer, primary_key=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
+    user_id = db.Column(BIGINT, primary_key=True)
+    admin_id = db.Column(BIGINT, db.ForeignKey('admins.telegram_id', onupdate='CASCADE',
                                                    ondelete='CASCADE'))
     game_id = db.Column(db.Integer, default=0, nullable=False)
     count = db.Column(db.Integer, nullable=False, default=1)
     day = db.Column(db.Integer, nullable=False, default=datetime.now().day)
 
-    def __init__(self, user_id: int, admin_id: int=None, game_id: int = None) -> None:
+    def __init__(self, user_id: int, admin_id: int = None, game_id: int = None) -> None:
         self.user_id = user_id
         self.admin_id = admin_id
         if game_id is not None:
