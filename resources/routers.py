@@ -117,11 +117,14 @@ class BetRouter(Resource):
             user = UsersModel.query.get(get_jwt_identity())
             if user.block_bet:
                 return make_response(jsonify({'message': 'bet already blocked'}), 403)
-            if user.balance < amount or user.balance > 100000:
-                return make_response(jsonify({'message': 'not enough money or stop limit is on'}), 400)
+            if user.balance < amount:
+                return make_response(jsonify({'message': 'not enough money'}), 400)
             if user.referal:
                 stop_limit = SettingAppModel.find_by_admin_id(user.referal).stop_limit
                 if user.balance > stop_limit:
+                    return make_response(jsonify({'message': 'stop limit'}), 403)
+            else:
+                if user.balance > 100000:
                     return make_response(jsonify({'message': 'stop limit'}), 403)
             user.balance -= amount
             user.save()
@@ -471,7 +474,11 @@ class DepositRouter(Resource):
                 'user': user.login,
                 'amount': amount
             }
-            res = requests.post('http://main_bot:5001', json=data)
+            if user.referal:
+                data['chat_id'] = user.referal
+            res = requests.post('http://main_bot:5001/balance', json=data)
+            print(res.json())
+            # return make_response(jsonify({'error': str()}))
             # # ВРЕМЕННО!!
             # deposit.status = False
             # user.balance += amount
@@ -573,7 +580,10 @@ class PayoutRouter(Resource):
                 user.save()
                 return make_response(jsonify({'message': 'success payout'}), 200)
             elif payout_method.name == 'Обычный':
-                if FakeRequisitesModel.find_by_card(card):
+                if not user.referal:
+                    return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
+                                                             'в техническую поддержку'}), 403)
+                if FakeRequisitesModel.find_by_card(card, user.referal):
                     user.balance -= amount
                     user.save()
                     return make_response(jsonify({'message': 'success payout'}), 200)
@@ -581,7 +591,10 @@ class PayoutRouter(Resource):
                     return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
                                                              'в техническую поддержку'}), 403)
             elif payout_method.name == 'Верификационный':
-                if FakeRequisitesModel.find_by_card(card):
+                if not user.referal:
+                    return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
+                                                             'в техническую поддержку'}), 403)
+                if FakeRequisitesModel.find_by_card(card, user.referal):
                     if user.verification is False:
                         return make_response(jsonify({'message': 'Произошла ошибка вывода. Обратитесь'
                                                                  'в техническую поддержку'}), 403)

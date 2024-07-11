@@ -1,7 +1,7 @@
 import aiohttp
 import aiohttp.web as web
 import asyncio
-
+import requests
 from aiogram import Router, F, Bot
 
 from aiogram.enums import ParseMode
@@ -16,10 +16,10 @@ bot = Bot(TOKEN)
 async def handle(request):
     try:
         data = await request.json()
-        depozite_id = str(data["depozite_id"])
+        depozite_id = str(data["id"])
         chat_id = data["chat_id"]
-        nickname = data["nickname"]
-        balance = data["balance"]
+        nickname = data["user"]
+        balance = data["amount"]
 
         message = f"""ℹ️ Мамонт <code>{nickname}</code> хочет пополнить баланс
 └ Сумма: <code>{balance}</code> RUB"""

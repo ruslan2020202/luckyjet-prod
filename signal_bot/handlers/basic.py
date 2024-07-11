@@ -19,11 +19,13 @@ router_basic = Router()
 @router_basic.message(CommandStart(deep_link=True))
 async def handler(message: Message, command: CommandObject):
     admin_id = command.args
+    res = requests.post(f'{URL}/api/bot/admin/{admin_id}')
+    promo = res.json()['word']
     requests.post(
         f"{URL}/api/bot/signal/{message.from_user.id}", json={"admin_id": admin_id}
     )
     await message.answer(
-        messages.get_start_text1(admin_id),
+        messages.get_start_text1(promo),
         parse_mode=ParseMode.HTML,
         reply_markup=inline.main,
     )

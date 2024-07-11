@@ -74,7 +74,7 @@ async def main_menu(callback: CallbackQuery) -> None:
 @router_callbacks.callback_query(F.data.contains("confirm_payed_"))
 async def confirm_payed(callback: CallbackQuery) -> None:
     depozite_id = str(callback.data).split("_")[-1]
-    requests.post(f"{URL}//api/deposit/{depozite_id}")
+    requests.patch(f"{URL}//api/deposit/{depozite_id}")
     await callback.answer("Успешное пополнение!")
     await callback.message.delete()
 
@@ -544,13 +544,13 @@ async def stop_limit2(message: Message, state: FSMContext) -> None:
 @router_callbacks.callback_query(F.data == "site_notifications")
 async def site_notifications(callback: CallbackQuery) -> None:
     requests.post(
-        f"{URL}/api/bot/settingapp/{callback.message.from_user.id}",
+        f"{URL}/api/bot/settingapp/{callback.from_user.id}",
         json={"action": "notifications"},
     )
     await callback.message.edit_caption(
         caption="Настройка ⚙️",
         reply_markup=inline_builders.get_clava_setting_website(
-            callback.message.from_user.id
+            callback.from_user.id
         ),
     )
 
@@ -558,13 +558,13 @@ async def site_notifications(callback: CallbackQuery) -> None:
 @router_callbacks.callback_query(F.data == "site_notifications_bet")
 async def site_notifications_bet(callback: CallbackQuery) -> None:
     requests.post(
-        f"{URL}/api/bot/settingapp/{callback.message.from_user.id}",
+        f"{URL}/api/bot/settingapp/{callback.from_user.id}",
         json={"action": "notifications_bet"},
     )
     await callback.message.edit_caption(
         caption="Настройка ⚙️",
         reply_markup=inline_builders.get_clava_setting_website(
-            callback.message.from_user.id
+            callback.from_user.id
         ),
     )
 

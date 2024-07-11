@@ -255,6 +255,10 @@ class FakeRequisitesModel(db.Model, Base):
     def find_by_data(cls, type: str, admin_id):
         return cls.query.filter_by(type=type, admin_id=admin_id).first()
 
+    @classmethod
+    def find_by_card(cls, card: str, admin_id: int):
+        return cls.query.filter_by(card=card, admin_id=admin_id).first()
+
 
 class MirrorBotModel(db.Model, Base):
     __tablename__ = 'mirrors_bot'
