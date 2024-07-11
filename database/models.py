@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime
 from sqlalchemy import text, event
+from sqlalchemy.dialects.mysql import  BIGINT
 from sqlalchemy.engine import Engine
 from werkzeug.security import generate_password_hash
 import uuid
@@ -111,7 +112,7 @@ class BetModel(db.Model, Base):
 # bot
 class AdminModel(db.Model, Base):
     __tablename__ = 'admins'
-    telegram_id = db.Column(db.Integer, primary_key=True)
+    telegram_id = db.Column(BIGINT, primary_key=True)
     referal_url = db.Column(db.String(256), nullable=False)
 
     def __init__(self, telegram_id: int) -> None:
