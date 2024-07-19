@@ -8,6 +8,7 @@ from sqlalchemy.dialects.mysql import BIGINT
 from sqlalchemy.engine import Engine
 from werkzeug.security import generate_password_hash
 import uuid
+import random
 
 load_dotenv()
 db = SQLAlchemy()
@@ -18,11 +19,11 @@ def execute_data(query: str):
     return result.fetchall()
 
 
-# @event.listens_for(Engine, "connect")
-# def set_sqlite_pragma(dbapi_connection, connection_record):
-#     cursor = dbapi_connection.cursor()
-#     cursor.execute("PRAGMA foreign_keys=ON")
-#     cursor.close()
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 class Base:
@@ -85,13 +86,14 @@ class GameModel(db.Model, Base):
     __tablename__ = 'games'
     _id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     multiplier = db.Column(db.Float, nullable=False, default=0.0)  # Изменено на nullable=True
-    status = db.Column(db.Boolean, nullable=False, default=True)
-    id = db.Column(db.Integer)
+    state = db.Column(db.Integer, nullable=False, default=1)
+    id = db.Column(db.Integer, default=lambda: random.randint(1, 99999), nullable=False)
 
-    def __init__(self, id: int, multiplier: int = None) -> None:
-        self.id = id
+    def __init__(self, multiplier: int = None) -> None:
         self.multiplier = multiplier
 
+    def __repr__(self):
+        return f'{self._id}, {self.multiplier}, {self.state}, {self.id}'
 
 class BetModel(db.Model, Base):
     __tablename__ = 'bets'
@@ -293,3 +295,16 @@ class UsersSignalsModel(db.Model, Base):
         self.admin_id = admin_id
         if game_id is not None:
             self.game_id = game_id
+
+
+class TopBetsModel(db.Model, Base):
+    __tablename__ = 'top_bets'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(256), nullable=False)
+    bet = db.Column(db.Integer, nullable=False)
+    multiplier = db.Column(db.Float, nullable=False)
+
+    def __init__(self, username: str, bet: int, multiplier: float) -> None:
+        self.username = username
+        self.bet = bet
+        self.multiplier = multiplier

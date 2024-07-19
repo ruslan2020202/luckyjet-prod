@@ -19,7 +19,7 @@ class UserSchema(SchemaBase, ma.Schema):
 
 class GameSchema(SchemaBase, ma.Schema):
     class Meta:
-        fields = ('id', 'multiplier', 'status')
+        fields = ('id', 'multiplier', 'state')
 
 
 class AdminSchema(SchemaBase, ma.Schema):
@@ -70,3 +70,8 @@ class BotSchema(SchemaBase, ma.Schema):
 class SettingBotSchema(SchemaBase, ma.Schema):
     class Meta:
         fields = ('count_signals', 'referal_system')
+
+
+class TopBetsSchema(SchemaBase, ma.Schema):
+    class Meta:
+        fields = ('username', 'bet', 'multiplier')

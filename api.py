@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 from database.models import *
 from resources.actions import register_actions
 from resources.errors import Errors
+from sockets.socket import *
 
 
 def create_app(config):
@@ -22,4 +23,7 @@ def create_app(config):
     Marshmallow(app)
     register_actions(app)
     Errors(app)
-    return app
+    socketio = sockets_add(app)
+    return app, socketio
+
+

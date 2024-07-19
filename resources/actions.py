@@ -9,7 +9,7 @@ def register_actions(app):
     # для сайта
     api.add_resource(SignUp, '/api/auth/signup', strict_slashes=False)  #
     api.add_resource(AuthLogin, '/api/auth/login', strict_slashes=False)  #
-    api.add_resource(GameNew, '/api/game', strict_slashes=False)  #
+    # api.add_resource(GameNew, '/api/game', strict_slashes=False)  #
     api.add_resource(GameWork, '/api/game/<id>', strict_slashes=False)  #
     api.add_resource(BetRouter, '/api/bet/<id>', strict_slashes=False)  #
     api.add_resource(HistoryBets, '/api/historybet', strict_slashes=False)  #
@@ -17,7 +17,7 @@ def register_actions(app):
     api.add_resource(UserInfo, '/api/user', strict_slashes=False)  #
 
     #
-    api.add_resource(GameOver, '/api/gameover/<id>', strict_slashes=False)  #
+    # api.add_resource(GameOver, '/api/gameover/<id>', strict_slashes=False)  #
     api.add_resource(DepositRouter, '/api/deposit', '/api/deposit/<id>', strict_slashes=False)  #
     api.add_resource(PayoutRouter, '/api/payout', strict_slashes=False)
     api.add_resource(ActivatePromocodeRouter, '/api/activate_promocode', strict_slashes=False)  #
@@ -25,6 +25,7 @@ def register_actions(app):
     api.add_resource(MyBets, '/api/mybets', strict_slashes=False)  #
     api.add_resource(AllUsers, '/api/allusers', strict_slashes=False)  #
     api.add_resource(AdminPanel, '/api/adminpanel', strict_slashes=False)
+    api.add_resource(TopBets, '/api/topbets', strict_slashes=False)
 
     # для бота
     api.add_resource(AdminRouter, '/api/bot/admin/<id>', strict_slashes=False)  # admin_id  #

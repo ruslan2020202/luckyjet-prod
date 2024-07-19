@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from flask import jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_socketio import emit
 
 from faker import Faker
 import random
@@ -17,70 +18,62 @@ import requests
 # class GameNew(Resource):
 #     def post(self):
 #         try:
-#             # multiplier = AlgorithmCrash().get_result()
-#             print(request.json.get('state'))
-#             state = request.json.get('state')
-#             print(None,'none')
-#             # id = request.json.get('id')
-#             # multiplier = request.json.get('multiplier')
-#
-#             game = GameModel(state['multiplier'], state['id'])
+#             multiplier = AlgorithmCrash().get_result()
+#             game = GameModel(multiplier=multiplier)
 #             game.save()
-#             print('game create')
-#             print('game create id=' + state['id'] + 'multiplier = ' + state['multiplier'])
-#             return GameSchema(many=False).dump(game), 201
+#             emit('state', GameSchema().dump(game))
+#         except Exception as e:
+#             print(e)
+#             return make_response(jsonify({'error': str(e)}), 500)
+# class GameOver(Resource):
+#     def post(self, id):  # game_id
+#         try:
+#             multiplier = request.json.get("multiplier")
+#             bets = BetModel.query.filter_by(game_id=id).all()
+#             if not bets:
+#                 return make_response(jsonify({'message': 'Bets not found'}), 404)
+#             game = GameModel(multiplier)
+#             game.save()
+#             for i in bets:
+#                 if i.win is True:
+#                     sum = round((i.amount * i.multiplier), 2)
+#                     user = UsersModel.query.get(i.user_id)
+#                     user.balance += sum
+#                     user.save()
+#             return make_response(jsonify({'message': 'success'}), 200)
 #         except Exception as e:
 #             return make_response(jsonify({'error': str(e)}))
-class GameOver(Resource):
-    def post(self, id):  # game_id
-        try:
-            multiplier = request.json.get("multiplier")
-            bets = BetModel.query.filter_by(game_id=id).all()
-            if not bets:
-                return make_response(jsonify({'message': 'Bets not found'}), 404)
-            game = GameModel(id, multiplier)
-            game.save()
-            for i in bets:
-                if i.win is True:
-                    sum = round((i.amount * i.multiplier), 2)
-                    user = UsersModel.query.get(i.user_id)
-                    user.balance += sum
-                    user.save()
-            return make_response(jsonify({'message': 'success'}), 200)
-        except Exception as e:
-            return make_response(jsonify({'error': str(e)}))
 
 
-class GameNew(Resource):
-    def post(self):
-        try:
-            state = request.json.get('state')
-
-            if not isinstance(state, dict):
-                return make_response(jsonify({'error': 'State must be an object'}), 400)
-
-            game_id = state.get('id')
-            multiplier = state.get('multiplier', None)  # Default to None if not present
-
-            if game_id is None:
-                return make_response(jsonify({'error': 'Game ID is required'}), 400)
-
-            # Проверка существования записи с таким же id
-            game = GameModel.query.filter_by(id=game_id).first()
-
-            if game:
-                if multiplier is not None:
-                    game.multiplier = multiplier
-                game.save()
-            else:
-                game = GameModel(id=game_id, multiplier=multiplier)
-                game.save()
-
-            return make_response(jsonify({'message': 'Game processed successfully'}), 200)
-
-        except Exception as e:
-            print(e)
-            return make_response(jsonify({'error': str(e)}), 400)
+# class GameNew(Resource):
+#     def post(self):
+#         try:
+#             state = request.json.get('state')
+#
+#             if not isinstance(state, dict):
+#                 return make_response(jsonify({'error': 'State must be an object'}), 400)
+#
+#             game_id = state.get('id')
+#             multiplier = state.get('multiplier', None)  # Default to None if not present
+#
+#             if game_id is None:
+#                 return make_response(jsonify({'error': 'Game ID is required'}), 400)
+#
+#             # Проверка существования записи с таким же id
+#             game = GameModel.query.filter_by(id=game_id).first()
+#
+#             if game:
+#                 if multiplier is not None:
+#                     game.multiplier = multiplier
+#                 game.save()
+#             else:
+#                 game = GameModel(id=game_id, multiplier=multiplier)
+#                 game.save()
+#
+#             return make_response(jsonify({'message': 'Game processed successfully'}), 200)
+#         except Exception as e:
+#             print(e)
+#             return make_response(jsonify({'error': str(e)}), 500)
 
 
 class GameWork(Resource):
@@ -190,13 +183,13 @@ class HistoryGames(Resource):
     def get(self):
         try:
             games = execute_data("""
-            select id, multiplier
+            select _id, id, multiplier
             from games
-            where multiplier != 0
+            where state = 3
             order by _id desc 
             limit 23
             """)
-            # print(games)
+            print(games)
             return GameSchema(many=True).dump(games), 200
         except Exception as e:
             return make_response(jsonify({'error': str(e)}))
@@ -338,7 +331,6 @@ class SignalRouter(Resource):
             data = execute_data("""
                                             select id, multiplier
                                             from games
-                                            where multiplier != 0
                                             order by _id desc
                                             limit 1
                                             """)
@@ -462,6 +454,10 @@ class DepositRouter(Resource):
                 summ = round((amount / 85), 9)
             elif type == 'rub':
                 pass
+            elif type == 'ukr':
+                summ = round((amount / 2), 9)
+            elif type == 'kaz':
+                summ = round((amount * 5), 9)
             else:
                 return make_response(jsonify({'error': 'error country'}), 400)
             deposit = DepositModel(get_jwt_identity(), amount, summ, requisite.id)
@@ -934,5 +930,14 @@ class BotSettingRouter(Resource):
                 return make_response(jsonify({'error': 'not correct action'}), 400)
             settings_bot.save()
             return make_response(jsonify({'message': 'success'}), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
+
+class TopBets(Resource):
+    def get(self):
+        try:
+            top_bets = TopBetsModel.query.all()
+            return TopBetsSchema(many=True).dump(top_bets)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
