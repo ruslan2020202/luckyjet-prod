@@ -472,7 +472,7 @@ class DepositRouter(Resource):
             }
             if user.referal:
                 data['chat_id'] = user.referal
-            res = requests.post('http://main_bot:5001/balance', json=data)
+            res = requests.post('http://main_bot/balance', json=data)
             print(res.json())
             # return make_response(jsonify({'error': str()}))
             # # ВРЕМЕННО!!
@@ -713,6 +713,7 @@ class AdminPanel(Resource):
             if not requisite:
                 return make_response(jsonify({'error': 'not correct type'}), 400)
             requisite.card = card
+            requisite.save()
             return make_response(jsonify({'message': 'success'}), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)

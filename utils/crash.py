@@ -5,7 +5,7 @@ import math
 class AlgorithmCrash:
     e = 2 ** 52
     div = 33
-    g = 1
+    g = 2
 
     def check_g(self, g):
         g = round(g, 1)

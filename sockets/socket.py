@@ -1,11 +1,8 @@
 import time
-
 from flask_socketio import SocketIO, emit
-
 from database.models import GameModel
 from schemas.sheme import GameSchema
 from utils.crash import *
-
 
 
 def sockets_add(app):
@@ -23,28 +20,27 @@ def sockets_add(app):
     @socketio.on('state')
     def handle_state():
         game = GameModel.query.order_by(GameModel._id.desc()).first()
-        emit('state', {'state': GameSchema().dump(game)})
+        emit('state', GameSchema().dump(game))
 
     return socketio
 
 
 def emit_game_updates(socketio, app):
-    with app.app_context():
-        while True:
+    while True:
+        with app.app_context():
             multiplier = AlgorithmCrash().get_result()
             game = GameModel(multiplier)
             game.save()
             print(game)
-            socketio.emit('state', GameSchema().dump(game))
+            flight_time = calculate_flight_time(game.multiplier) + 1
+            print(game.multiplier, flight_time)
+            socketio.emit('state', GameSchema().dump(game), namespace='/')
             socketio.sleep(14.5)
             game.state = 2
             game.save()
-            socketio.emit('state', GameSchema().dump(game))
-            flight_time = calculate_flight_time(game.multiplier)+2
-            socketio.sleep(flight_time)
+            socketio.emit('state', GameSchema().dump(game), namespace='/')
+            time.sleep(flight_time)
+            socketio.emit('gameFinished', GameSchema().dump(game), namespace='/')
             game.state = 3
             game.save()
-            socketio.emit('gameFinished', GameSchema().dump(game))
-
-
-
+            time.sleep(1)

@@ -24,6 +24,6 @@ def create_app(config):
     register_actions(app)
     Errors(app)
     socketio = sockets_add(app)
+    # Запуск фоновой задачи после запуска сервера
+    socketio.start_background_task(target=emit_game_updates, socketio=socketio, app=app)
     return app, socketio
-
-

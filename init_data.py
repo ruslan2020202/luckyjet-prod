@@ -27,8 +27,4 @@ if __name__ == '__main__':
         admin.admin = True
         admin.save()
         for i in range(25):
-            TopBetsModel(fake.name(), random.randint(3000, 22000), random.uniform(70.0, 140.0)).save()
-
-
-
-
+            TopBetsModel(fake.name(), random.randint(3000, 22000), round(random.uniform(70.0, 140.0), 2)).save()
