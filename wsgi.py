@@ -6,6 +6,6 @@ app, socketio = create_app(config.ProductionConfig)
 if __name__ == '__main__':
     try:
         # Запуск Flask-сервера
-        socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+        socketio.run(app, host='0.0.0.0', port=5000)
     except KeyboardInterrupt:
         print('Exit')
