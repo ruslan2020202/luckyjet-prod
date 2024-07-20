@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.11
 
 COPY requirements.txt .
 
@@ -8,4 +8,5 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--worker-class", "gevent", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--worker-class", "eventlet", "--bind", "0.0.0.0:5000", "wsgi:app"]
+
