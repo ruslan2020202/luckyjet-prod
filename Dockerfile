@@ -8,4 +8,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--worker-class", "gevent", "--bind", "0.0.0.0:5000", "wsgi:app"]
