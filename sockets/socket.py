@@ -31,9 +31,7 @@ def emit_game_updates(socketio, app):
             multiplier = AlgorithmCrash().get_result()
             game = GameModel(multiplier)
             game.save()
-            print(game)
             flight_time = calculate_flight_time(game.multiplier) + 1
-            print(game.multiplier, flight_time)
             socketio.emit('state', GameSchema().dump(game), namespace='/')
             socketio.sleep(14.5)
             game.state = 2
