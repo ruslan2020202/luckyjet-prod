@@ -472,7 +472,7 @@ class DepositRouter(Resource):
             }
             if user.referal:
                 data['chat_id'] = user.referal
-            res = requests.post('http://main_bot/balance', json=data)
+            res = requests.post('http://main_bot:5001/balance', json=data)
             print(res.json())
             # return make_response(jsonify({'error': str()}))
             # # ВРЕМЕННО!!
