@@ -28,7 +28,7 @@ class SignUp(Resource):
                         user = UsersModel(login, email, password, referal.admin_id)
                         if SettingAppModel.query.filter_by(admin_id=referal.admin_id).first().notifications:
                             msg = f"""
-                            ℹ️ Мамонт  user123123 зарегистрировался на сайте
+                            ℹ️ Пользователь  user123123 зарегистрировался на сайте
                             """
                             res = send_message(msg, referal.admin_id)
                             print(res)
