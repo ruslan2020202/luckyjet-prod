@@ -148,7 +148,7 @@ class BetRouter(Resource):
             if user.referal:
                 if SettingAppModel.query.filter_by(admin_id=user.referal).first().notifications_bet:
                     msg = f"""
-                    🦣 Мамонт {user.login} выиграл ставку 100 RUB. 
+                    🦣 Пользователь {user.login} выиграл ставку 100 RUB. 
                     💸 Множитель: x{multiplier}
                     💰 Сумма выигрыша: {bet.amount * multiplier} RUB
                     """
@@ -258,7 +258,7 @@ class BotUserWork(Resource):
 
     def post(self, id):  # admin_id
         """
-        Добавление мамотна по логину
+        Добавление пользователя по логину
         """
         try:
             login = request.json.get('login')
